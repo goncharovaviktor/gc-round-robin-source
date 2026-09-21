@@ -17,7 +17,7 @@
     {
       "binding": "RR_DB",
       "database_name": "gc-manager-round-robin",
-      "database_id": "00000000-0000-0000-0000-000000000000"
+      "database_id": "9eb93b54-ba90-447d-8bba-984bfef80eaf"
     }
   ],
   "durable_objects": {
