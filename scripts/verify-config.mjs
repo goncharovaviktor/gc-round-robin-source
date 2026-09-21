@@ -14,8 +14,8 @@ if (!allowTemplateDefaults && /YOUR-SCHOOL/i.test(config.vars?.GC_BASE_URL || ""
   errors.push("Replace YOUR-SCHOOL in GC_BASE_URL.");
 }
 const databaseId = config.d1_databases?.[0]?.database_id || "";
-if (!allowTemplateDefaults && databaseId === "00000000-0000-0000-0000-000000000000") {
-  errors.push("Replace the placeholder D1 database_id.");
+if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(databaseId)) {
+  errors.push("D1 database_id must be a UUID-shaped value.");
 }
 if (!allowTemplateDefaults && config.vars?.MANAGER_CONFIG_READY !== "true") {
   errors.push("Set MANAGER_CONFIG_READY to true only after checking src/manager-config.js.");
