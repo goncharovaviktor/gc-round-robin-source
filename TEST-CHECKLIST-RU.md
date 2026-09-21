@@ -3,9 +3,10 @@
 ## A. Проверка Deploy
 
 - [ ] В Cloudflare последний Deployment зелёный.
-- [ ] В build log прошли 20 unit- и 13 интеграционных тестов.
+- [ ] В build log прошли 24 unit- и 13 интеграционных тестов.
+- [ ] Перед миграциями прошёл этап автоматического provisioning ресурсов.
 - [ ] Миграции `0001_initial.sql` и `0002_dead_letters.sql` применились.
-- [ ] `/health` возвращает HTTP 200, `ok: true`, версию `2.1.0`.
+- [ ] `/health` возвращает HTTP 200, `ok: true`, версию `2.2.0`.
 - [ ] В `/health` все четыре признака готовности равны `true`.
 - [ ] Количество пулов и активных менеджеров правильное.
 - [ ] В Bindings видны `RR_DB`, `POOL_ALLOCATOR`, `GC_WRITE_QUEUE`,
@@ -16,7 +17,7 @@
 
 ## B. Сверка менеджеров
 
-Cloudflare → D1 → `gc-manager-round-robin` → Console:
+Worker → Settings → Bindings → `RR_DB` → Console:
 
 ```sql
 SELECT pool, manager_code, manager_name, active, sort_order

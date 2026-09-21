@@ -13,14 +13,21 @@ if (!/^https:\/\/[^\s/]+$/i.test(config.vars?.GC_BASE_URL || "")) {
 if (!allowTemplateDefaults && /YOUR-SCHOOL/i.test(config.vars?.GC_BASE_URL || "")) {
   errors.push("Replace YOUR-SCHOOL in GC_BASE_URL.");
 }
-const databaseId = config.d1_databases?.[0]?.database_id || "";
-if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(databaseId)) {
-  errors.push("D1 database_id must be a UUID-shaped value.");
+const d1Binding = config.d1_databases?.find((item) => item.binding === "RR_DB");
+if (!d1Binding) errors.push("D1 binding RR_DB is missing.");
+const databaseId = d1Binding?.database_id;
+if (
+  databaseId !== undefined &&
+  !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(databaseId)
+) {
+  errors.push("When D1 database_id is present, it must be a UUID-shaped value.");
+}
+if (databaseId === "00000000-0000-0000-0000-000000000000") {
+  errors.push("Remove the zero D1 database_id entirely so Cloudflare can provision the database automatically.");
 }
 if (!allowTemplateDefaults && config.vars?.MANAGER_CONFIG_READY !== "true") {
   errors.push("Set MANAGER_CONFIG_READY to true only after checking src/manager-config.js.");
 }
-if (config.d1_databases?.[0]?.binding !== "RR_DB") errors.push("D1 binding must be RR_DB.");
 if (config.durable_objects?.bindings?.[0]?.name !== "POOL_ALLOCATOR") {
   errors.push("Durable Object binding must be POOL_ALLOCATOR.");
 }

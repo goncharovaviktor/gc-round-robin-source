@@ -10,14 +10,12 @@
   "vars": {
     "GC_BASE_URL": "https://mfworld.getcourse.ru",
     "GC_MANAGER_CODE_FIELD": "manager_code",
-    "MANAGER_CONFIG_READY": "true",
+    "MANAGER_CONFIG_READY": "false",
     "RETENTION_DAYS": "90"
   },
   "d1_databases": [
     {
-      "binding": "RR_DB",
-      "database_name": "gc-manager-round-robin",
-      "database_id": "9eb93b54-ba90-447d-8bba-984bfef80eaf"
+      "binding": "RR_DB"
     }
   ],
   "durable_objects": {

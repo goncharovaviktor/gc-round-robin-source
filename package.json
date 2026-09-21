@@ -1,6 +1,6 @@
 {
   "name": "gc-manager-round-robin-cloudflare",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "private": true,
   "type": "module",
   "engines": {
@@ -9,15 +9,15 @@
   "scripts": {
     "build": "npm run check",
     "test": "npm run test:unit && npm run test:integration",
-    "test:unit": "node --test test/core.test.mjs test/resilience.test.mjs",
+    "test:unit": "node --test test/core.test.mjs test/resilience.test.mjs test/deploy.test.mjs",
     "test:integration": "vitest run",
-    "check:syntax": "node --check src/core.js && node --check src/manager-config.js && node --check src/worker.js",
+    "check:syntax": "node --check src/core.js && node --check src/manager-config.js && node --check src/worker.js && node --check scripts/deploy-core.mjs && node --check scripts/deploy.mjs",
     "check": "npm run check:syntax && npm run check:config && npm run test",
     "check:config": "node scripts/verify-config.mjs",
     "check:template": "ALLOW_TEMPLATE_DEFAULTS=1 node scripts/verify-config.mjs",
     "generate:secrets": "node scripts/generate-secrets.mjs",
     "db:migrations:apply": "wrangler d1 migrations apply RR_DB --remote",
-    "deploy": "npm run db:migrations:apply && wrangler deploy"
+    "deploy": "node scripts/deploy.mjs"
   },
   "devDependencies": {
     "@cloudflare/vitest-plugin": "1.1.13",

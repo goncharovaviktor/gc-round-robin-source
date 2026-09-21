@@ -3,22 +3,29 @@
 Эта инструкция рассчитана на Cloudflare Workers Free и установку только через
 интерфейсы GitHub и Cloudflare. Командная строка не нужна.
 
-## Что будет создано автоматически
+## Что создаётся автоматически
 
-Кнопка Deploy to Cloudflare прочитает `wrangler.jsonc` и создаст в выбранном
-аккаунте:
+Во время первого Deploy Cloudflare самостоятельно создаёт и настраивает:
 
 - Worker `gc-manager-round-robin`;
-- D1-базу `gc-manager-round-robin`;
-- SQLite Durable Object `PoolAllocator`;
+- D1-базу и привязку `RR_DB`;
 - рабочую очередь `gc-manager-rr-write`;
 - аварийную очередь `gc-manager-rr-dlq`;
+- SQLite Durable Object `PoolAllocator`;
+- consumers обеих Queue;
 - Cron раз в пять минут;
 - таблицы D1 из папки `migrations`.
 
-Cloudflare официально поддерживает автоматическое создание D1, Durable
-Objects и Queues через Deploy button. Репозиторий-источник при этом должен быть
-публичным:
+В этой версии поле `database_id` намеренно отсутствует. Именно отсутствие ID
+включает штатное automatic provisioning Cloudflare. Нулевой UUID использовать
+нельзя: он воспринимается как ID существующей базы и вызывает ошибку `7404`.
+
+Скрипт установки сначала выполняет `wrangler deploy`, чтобы Cloudflare успел
+создать и привязать ресурсы, и только затем применяет D1 migrations. При
+временном сбое миграция повторяется не более трёх раз с паузами. Никаких D1,
+Queue, bindings или таблиц вручную создавать не требуется.
+
+Репозиторий-источник для Deploy button должен быть публичным:
 
 - [Deploy to Cloudflare buttons](https://developers.cloudflare.com/workers/platform/deploy-buttons/)
 - [Workers Builds](https://developers.cloudflare.com/workers/ci-cd/builds/configuration/)
@@ -36,7 +43,7 @@ Objects и Queues через Deploy button. Репозиторий-источн�
 
 5. Подготовьте API-ключ GetCourse, который может обновлять пользователей.
 6. Распакуйте ZIP. Работайте с папкой
-   `gc-manager-round-robin-cloudflare-v2.1.0`.
+   `gc-manager-round-robin-cloudflare-v2.2.0`.
 
 ## 2. Создать два секрета без сайта и терминала
 
@@ -124,8 +131,16 @@ version: 1
    "MANAGER_CONFIG_READY": "true"
    ```
 
-4. Не меняйте нулевой `database_id`. Deploy button сам создаст D1 и подставит
-   реальный ID в созданный им репозиторий.
+4. В блоке `d1_databases` должна остаться только привязка:
+
+   ```json
+   "d1_databases": [
+     { "binding": "RR_DB" }
+   ]
+   ```
+
+   Не добавляйте `database_id` и `database_name`: Cloudflare создаст базу и
+   сохранит связь автоматически.
 5. Не добавляйте в этот файл API-ключ или секреты.
 
 ## 5. Загрузить комплект в GitHub
@@ -180,7 +195,7 @@ https://deploy.workers.cloudflare.com/?url=https://github.com/USERNAME/gc-round-
 3. Для конечного репозитория укажите, например,
    `gc-manager-round-robin-school`.
 4. Имя Worker оставьте `gc-manager-round-robin`.
-5. Имена ресурсов оставьте такими, как предложено проектом.
+5. Имена ресурсов оставьте такими, как указано в проекте.
 6. Проверьте команды, которые Cloudflare подставил автоматически:
 
    | Поле | Значение |
@@ -199,24 +214,28 @@ https://deploy.workers.cloudflare.com/?url=https://github.com/USERNAME/gc-round-
 
 8. Нажмите **Save and Deploy** / **Deploy**.
 
-Cloudflare создаст отдельный конечный GitHub-репозиторий, ресурсы и запустит
-сборку. Исходный `gc-round-robin-source` после успешной установки можно
-удалить: дальнейшие изменения делаются в конечном репозитории, подключённом к
-Worker.
+Cloudflare создаст отдельный конечный GitHub-репозиторий и запустит сборку,
+которая сама создаст D1, обе Queue, Durable Object, bindings и таблицы.
+Исходный `gc-round-robin-source` после успешной установки можно удалить:
+дальнейшие изменения делаются в конечном репозитории, подключённом к Worker.
 
 ## 7. Что должно быть в журнале первого Deploy
 
 Откройте детали сборки и дождитесь зелёного статуса. В логе должны пройти:
 
 1. проверка конфигурации;
-2. 20 unit-тестов;
+2. 24 unit-теста;
 3. 13 интеграционных тестов Cloudflare;
-4. применение `0001_initial.sql` и `0002_dead_letters.sql`;
-5. публикация Worker.
+4. строка `[1/2] Deploying Worker and automatically provisioning...`;
+5. автоматическое создание D1, Queue и Durable Object;
+6. применение `0001_initial.sql` и `0002_dead_letters.sql`;
+7. строка `Deployment and D1 migrations completed successfully`.
 
-Если тест или проверка не прошли, Worker не должен заменять рабочую версию.
-Не отключайте `npm run build` ради обхода ошибки — найдите сообщение по таблице
-ниже.
+Если тест или проверка конфигурации не прошли, Deploy не запускается. Если
+ошибка возникла уже на этапе D1 migration, Worker может быть создан, но
+останется неготовым и `/health` вернёт 503 до успешного повторного Deploy.
+GetCourse на этом этапе ещё не подключается, поэтому назначения не теряются.
+Не отключайте `npm run build` ради обхода ошибки.
 
 | Ошибка | Что исправить |
 |---|---|
@@ -225,7 +244,10 @@ Worker.
 | `CONFIG_...DUPLICATE` | Удалить повторный пул или повторный код менеджера |
 | `CONFIG_INITIAL_MANAGER_UNKNOWN` | Исправить стартовый код: он должен присутствовать в списке этого пула |
 | `CONFIG_NO_ACTIVE_MANAGERS` | Оставить хотя бы одного активного в пуле |
-| миграция D1 не применена | Нажать Retry deployment; не создавать таблицы вручную |
+| `Remove the zero D1 database_id entirely` | Удалить из `wrangler.jsonc` всю строку `database_id` вместе с нулевым UUID |
+| `database ... could not be found` / код `7404` | Загружена старая сборка или оставлен `database_id`; использовать v2.2.0 и удалить это поле |
+| временная ошибка D1/API | Скрипт сам делает до трёх попыток; если все неудачны — нажать Retry deployment, ресурсы повторно не создадутся |
+| миграция D1 не применена | Нажать Retry deployment; таблицы и bindings вручную не создавать |
 | secret отсутствует | Добавить его по следующему разделу |
 
 ## 8. Если Deploy не предложил ввести секреты
@@ -243,7 +265,7 @@ Worker.
 
 Не создавайте их как обычный открытый Text value.
 
-## 9. Проверить созданные ресурсы
+## 9. Проверить автоматически созданные ресурсы
 
 В Worker откройте **Settings → Bindings**. Должны присутствовать:
 
@@ -254,9 +276,9 @@ Worker.
 | `GC_WRITE_QUEUE` | Queue producer |
 | `GC_WRITE_DLQ` | Queue producer |
 
-В разделе Queues должны быть две очереди, а у обеих — consumer
-`gc-manager-round-robin`. Для рабочей очереди `Max concurrency` должна быть
-равна `1`.
+В разделе Queues должны появиться `gc-manager-rr-write` и
+`gc-manager-rr-dlq`, а у обеих — consumer `gc-manager-round-robin`. Для
+рабочей очереди `Max concurrency` должна быть равна `1`.
 
 ## 10. Проверить `/health`
 
@@ -271,7 +293,7 @@ https://ВАШ_WORKER.workers.dev/health
 ```json
 {
   "ok": true,
-  "version": "2.1.0",
+  "version": "2.2.0",
   "database_ready": true,
   "manager_configuration_ready": true,
   "manager_configuration_version": 1,
@@ -296,8 +318,8 @@ https://ВАШ_WORKER.workers.dev/health
 
 ## 11. Проверить D1 через интерфейс Cloudflare
 
-1. Cloudflare Dashboard → **Storage & Databases → D1**.
-2. Откройте `gc-manager-round-robin`.
+1. В Worker откройте **Settings → Bindings**.
+2. В строке `RR_DB` нажмите на автоматически созданную D1-базу.
 3. Откройте **Console**.
 4. Вставьте и выполните:
 
