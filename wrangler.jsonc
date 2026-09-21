@@ -8,7 +8,7 @@
     "enabled": true
   },
   "vars": {
-    "GC_BASE_URL": "https://mfworld.getcourse.ru/",
+    "GC_BASE_URL": "https://mfworld.getcourse.ru",
     "GC_MANAGER_CODE_FIELD": "manager_code",
     "MANAGER_CONFIG_READY": "true",
     "RETENTION_DAYS": "90"
