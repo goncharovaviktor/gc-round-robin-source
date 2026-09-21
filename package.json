@@ -1,0 +1,40 @@
+{
+  "name": "gc-manager-round-robin-cloudflare",
+  "version": "2.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "npm run check",
+    "test": "npm run test:unit && npm run test:integration",
+    "test:unit": "node --test test/core.test.mjs test/resilience.test.mjs",
+    "test:integration": "vitest run",
+    "check:syntax": "node --check src/core.js && node --check src/manager-config.js && node --check src/worker.js",
+    "check": "npm run check:syntax && npm run check:config && npm run test",
+    "check:config": "node scripts/verify-config.mjs",
+    "check:template": "ALLOW_TEMPLATE_DEFAULTS=1 node scripts/verify-config.mjs",
+    "generate:secrets": "node scripts/generate-secrets.mjs",
+    "db:migrations:apply": "wrangler d1 migrations apply RR_DB --remote",
+    "deploy": "npm run db:migrations:apply && wrangler deploy"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-plugin": "1.1.13",
+    "vitest": "4.1.11",
+    "wrangler": "4.135.0"
+  },
+  "cloudflare": {
+    "bindings": {
+      "GC_API_KEY": {
+        "description": "Секретный API-ключ GetCourse. Никогда не добавляйте его в GitHub."
+      },
+      "WEBHOOK_SECRET": {
+        "description": "Случайная строка не короче 32 символов. Такой же секрет указывается в запросе GetCourse."
+      },
+      "ADMIN_TOKEN": {
+        "description": "Отдельная случайная строка не короче 32 символов для защищённых диагностических адресов."
+      }
+    }
+  }
+}

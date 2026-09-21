@@ -1,0 +1,71 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "gc-manager-round-robin",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-09-21",
+  "workers_dev": true,
+  "observability": {
+    "enabled": true
+  },
+  "vars": {
+    "GC_BASE_URL": "https://mfworld.getcourse.ru/",
+    "GC_MANAGER_CODE_FIELD": "manager_code",
+    "MANAGER_CONFIG_READY": "true",
+    "RETENTION_DAYS": "90"
+  },
+  "d1_databases": [
+    {
+      "binding": "RR_DB",
+      "database_name": "gc-manager-round-robin",
+      "database_id": "00000000-0000-0000-0000-000000000000"
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "POOL_ALLOCATOR",
+        "class_name": "PoolAllocator"
+      }
+    ]
+  },
+  "exports": {
+    "PoolAllocator": {
+      "type": "durable-object",
+      "storage": "sqlite"
+    }
+  },
+  "queues": {
+    "producers": [
+      {
+        "binding": "GC_WRITE_QUEUE",
+        "queue": "gc-manager-rr-write"
+      },
+      {
+        "binding": "GC_WRITE_DLQ",
+        "queue": "gc-manager-rr-dlq"
+      }
+    ],
+    "consumers": [
+      {
+        "queue": "gc-manager-rr-write",
+        "max_batch_size": 10,
+        "max_batch_timeout": 5,
+        "max_retries": 8,
+        "dead_letter_queue": "gc-manager-rr-dlq",
+        "max_concurrency": 1
+      },
+      {
+        "queue": "gc-manager-rr-dlq",
+        "max_batch_size": 10,
+        "max_batch_timeout": 5,
+        "max_retries": 10,
+        "max_concurrency": 1
+      }
+    ]
+  },
+  "triggers": {
+    "crons": [
+      "*/5 * * * *"
+    ]
+  }
+}
