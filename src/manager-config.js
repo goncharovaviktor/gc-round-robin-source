@@ -10,17 +10,18 @@
 // deliberately blocked so that a typo cannot silently replace the live setup.
 
 export const MANAGER_CONFIG = Object.freeze({
-  version: 1,
+  version: 2,
   pools: Object.freeze([
     {
       pool: "segment_1",
       initialLastManagerCode: "s1_manager_1",
       managers: [
         { code: "s1_manager_1", name: "Менеджер 1", active: true },
-        { code: "s1_manager_2", name: "Менеджер 2", active: true },
-        { code: "s1_manager_3", name: "Менеджер 3", active: true },
-        { code: "s1_manager_4", name: "Менеджер 4", active: true },
-        { code: "s1_manager_5", name: "Менеджер 5", active: true },
+        { code: "s1_manager_2", name: "Менеджер 2", active: false },
+        { code: "s1_manager_3", name: "Менеджер 3", active: false },
+        { code: "s1_manager_4", name: "Менеджер 4", active: false },
+        { code: "s1_manager_5", name: "Менеджер 5", active: false },
+        { code: "s1_manager_6", name: "Менеджер 6", active: true },
       ],
     },
     {
@@ -28,10 +29,11 @@ export const MANAGER_CONFIG = Object.freeze({
       initialLastManagerCode: "s2_manager_3",
       managers: [
         { code: "s2_manager_1", name: "Менеджер 1", active: true },
-        { code: "s2_manager_2", name: "Менеджер 2", active: true },
-        { code: "s2_manager_3", name: "Менеджер 3", active: true },
-        { code: "s2_manager_4", name: "Менеджер 4", active: true },
-        { code: "s2_manager_5", name: "Менеджер 5", active: true },
+        { code: "s2_manager_2", name: "Менеджер 2", active: false },
+        { code: "s2_manager_3", name: "Менеджер 3", active: false },
+        { code: "s2_manager_4", name: "Менеджер 4", active: false },
+        { code: "s2_manager_5", name: "Менеджер 5", active: false },
+        { code: "s2_manager_6", name: "Менеджер 6", active: true },
       ],
     },
     {
@@ -39,10 +41,11 @@ export const MANAGER_CONFIG = Object.freeze({
       initialLastManagerCode: "s3_manager_2",
       managers: [
         { code: "s3_manager_1", name: "Менеджер 1", active: true },
-        { code: "s3_manager_2", name: "Менеджер 2", active: true },
-        { code: "s3_manager_3", name: "Менеджер 3", active: true },
-        { code: "s3_manager_4", name: "Менеджер 4", active: true },
-        { code: "s3_manager_5", name: "Менеджер 5", active: true },
+        { code: "s3_manager_2", name: "Менеджер 2", active: false },
+        { code: "s3_manager_3", name: "Менеджер 3", active: false },
+        { code: "s3_manager_4", name: "Менеджер 4", active: false },
+        { code: "s3_manager_5", name: "Менеджер 5", active: false },
+        { code: "s3_manager_6", name: "Менеджер 6", active: true },
       ],
     },
     {
@@ -50,10 +53,11 @@ export const MANAGER_CONFIG = Object.freeze({
       initialLastManagerCode: "s4_manager_3",
       managers: [
         { code: "s4_manager_1", name: "Менеджер 1", active: true },
-        { code: "s4_manager_2", name: "Менеджер 2", active: true },
-        { code: "s4_manager_3", name: "Менеджер 3", active: true },
-        { code: "s4_manager_4", name: "Менеджер 4", active: true },
-        { code: "s4_manager_5", name: "Менеджер 5", active: true },
+        { code: "s4_manager_2", name: "Менеджер 2", active: false },
+        { code: "s4_manager_3", name: "Менеджер 3", active: false },
+        { code: "s4_manager_4", name: "Менеджер 4", active: false },
+        { code: "s4_manager_5", name: "Менеджер 5", active: false },
+        { code: "s4_manager_6", name: "Менеджер 6", active: true },
       ],
     },
   ]),
