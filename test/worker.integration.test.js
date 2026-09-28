@@ -8,10 +8,16 @@ import {
 } from "cloudflare:test";
 import { describe, expect, it, vi } from "vitest";
 import worker from "../src/worker.js";
+import { MANAGER_CONFIG } from "../src/manager-config.js";
 
 const WEBHOOK_SECRET = "integration-test-webhook-secret-0123456789";
+const TEST_POOL = MANAGER_CONFIG.pools[0].pool;
+const CONFIGURED_MANAGER_COUNT = MANAGER_CONFIG.pools.reduce(
+  (count, pool) => count + pool.managers.length,
+  0,
+);
 
-function allocationRequest(index, pool = "segment_1", secret = WEBHOOK_SECRET) {
+function allocationRequest(index, pool = TEST_POOL, secret = WEBHOOK_SECRET) {
   return new Request("https://worker.test/v1/allocate", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -67,16 +73,16 @@ describe("deployment readiness", () => {
       ok: true,
       database_ready: true,
       manager_configuration_ready: true,
-      manager_configuration_version: 1,
+      manager_configuration_version: MANAGER_CONFIG.version,
     });
-    expect(body.pools).toHaveLength(4);
+    expect(body.pools).toHaveLength(MANAGER_CONFIG.pools.length);
 
     const managerCount = await env.RR_DB.prepare("SELECT COUNT(*) AS total FROM managers").first();
-    expect(Number(managerCount.total)).toBe(20);
+    expect(Number(managerCount.total)).toBe(CONFIGURED_MANAGER_COUNT);
   });
 
   it("rejects unauthorized and malformed allocation requests", async () => {
-    const unauthorized = await workerExports.default.fetch(allocationRequest(1, "segment_1", "wrong"), env);
+    const unauthorized = await workerExports.default.fetch(allocationRequest(1, TEST_POOL, "wrong"), env);
     expect(unauthorized.status).toBe(401);
     expect(await unauthorized.text()).toBe("ERROR_UNAUTHORIZED");
 
@@ -120,8 +126,8 @@ describe("deployment readiness", () => {
     const counts = await env.RR_DB.prepare(
       "SELECT COUNT(*) AS managers, COUNT(DISTINCT pool) AS pools FROM managers",
     ).first();
-    expect(Number(counts.managers)).toBe(20);
-    expect(Number(counts.pools)).toBe(4);
+    expect(Number(counts.managers)).toBe(CONFIGURED_MANAGER_COUNT);
+    expect(Number(counts.pools)).toBe(MANAGER_CONFIG.pools.length);
   });
 
   it("blocks a changed manager file when its version was not increased", async () => {
@@ -157,7 +163,7 @@ describe("atomic allocation under load", () => {
     expect(responses.every((response) => response.status === 200)).toBe(true);
     expect(new Set(responses.map((response) => response.headers.get("X-RR-Job-Id"))).size).toBe(1_000);
 
-    const stub = env.POOL_ALLOCATOR.getByName("segment_1");
+    const stub = env.POOL_ALLOCATOR.getByName(TEST_POOL);
     const state = await runInDurableObject(stub, async (instance) => {
       const outbox = instance.sql
         .exec("SELECT payload FROM outbox ORDER BY CAST(json_extract(payload, '$.sequenceNumber') AS INTEGER)")
@@ -178,7 +184,18 @@ describe("atomic allocation under load", () => {
     );
     const counts = new Map();
     for (const job of state.outbox) counts.set(job.managerCode, (counts.get(job.managerCode) || 0) + 1);
-    expect([...counts.values()].sort((a, b) => a - b)).toEqual([200, 200, 200, 200, 200]);
+    const activeCodes = MANAGER_CONFIG.pools[0].managers
+      .filter((manager) => manager.active)
+      .map((manager) => manager.code);
+    expect([...counts.keys()].sort()).toEqual([...activeCodes].sort());
+    const expectedCounts = Array.from(
+      { length: activeCodes.length },
+      (_, index) => Math.floor(1_000 / activeCodes.length) + (index < 1_000 % activeCodes.length ? 1 : 0),
+    );
+    expect([...counts.values()].sort((a, b) => a - b)).toEqual(expectedCounts.sort((a, b) => a - b));
+    expect(state.outbox.every((job, index) =>
+      job.managerCode === state.outbox[index % activeCodes.length].managerCode,
+    )).toBe(true);
   });
 
   it("persists the cursor across Durable Object eviction", async () => {
