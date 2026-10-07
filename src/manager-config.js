@@ -68,5 +68,19 @@ export const MANAGER_CONFIG = Object.freeze({
         { code: "s4_manager_8", name: "Менеджер 8", active: true },
       ],
     },
+      {
+      pool: "segment_5",
+      initialLastManagerCode: "s5_manager_1",
+      managers: [
+        { code: "s4_manager_1", name: "Менеджер 1", active: true },
+        { code: "s4_manager_2", name: "Менеджер 2", active: false },
+        { code: "s4_manager_3", name: "Менеджер 3", active: false },
+        { code: "s4_manager_4", name: "Менеджер 4", active: false },
+        { code: "s4_manager_5", name: "Менеджер 5", active: false },
+        { code: "s4_manager_6", name: "Менеджер 6", active: true },
+        { code: "s4_manager_7", name: "Менеджер 7", active: false },
+        { code: "s4_manager_8", name: "Менеджер 8", active: false },
+      ],
+    },
   ]),
 });
