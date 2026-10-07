@@ -10,7 +10,7 @@
 // deliberately blocked so that a typo cannot silently replace the live setup.
 
 export const MANAGER_CONFIG = Object.freeze({
-  version: 5,
+  version: 8,
   pools: Object.freeze([
     {
       pool: "segment_1",
@@ -68,7 +68,7 @@ export const MANAGER_CONFIG = Object.freeze({
         { code: "s4_manager_8", name: "Менеджер 8", active: true },
       ],
     },
-      {
+    {
       pool: "segment_5",
       initialLastManagerCode: "s5_manager_1",
       managers: [
