@@ -10,7 +10,7 @@
 // deliberately blocked so that a typo cannot silently replace the live setup.
 
 export const MANAGER_CONFIG = Object.freeze({
-  version: 4,
+  version: 6,
   pools: Object.freeze([
     {
       pool: "segment_1",
