@@ -10,7 +10,7 @@
 // deliberately blocked so that a typo cannot silently replace the live setup.
 
 export const MANAGER_CONFIG = Object.freeze({
-  version: 8,
+  version: 7,
   pools: Object.freeze([
     {
       pool: "segment_1",
@@ -72,14 +72,14 @@ export const MANAGER_CONFIG = Object.freeze({
       pool: "segment_5",
       initialLastManagerCode: "s5_manager_1",
       managers: [
-        { code: "s4_manager_1", name: "Менеджер 1", active: true },
-        { code: "s4_manager_2", name: "Менеджер 2", active: false },
-        { code: "s4_manager_3", name: "Менеджер 3", active: false },
-        { code: "s4_manager_4", name: "Менеджер 4", active: false },
-        { code: "s4_manager_5", name: "Менеджер 5", active: false },
-        { code: "s4_manager_6", name: "Менеджер 6", active: true },
-        { code: "s4_manager_7", name: "Менеджер 7", active: false },
-        { code: "s4_manager_8", name: "Менеджер 8", active: false },
+        { code: "s5_manager_1", name: "Менеджер 1", active: true },
+        { code: "s5_manager_2", name: "Менеджер 2", active: false },
+        { code: "s5_manager_3", name: "Менеджер 3", active: false },
+        { code: "s5_manager_4", name: "Менеджер 4", active: false },
+        { code: "s5_manager_5", name: "Менеджер 5", active: false },
+        { code: "s5_manager_6", name: "Менеджер 6", active: true },
+        { code: "s5_manager_7", name: "Менеджер 7", active: false },
+        { code: "s5_manager_8", name: "Менеджер 8", active: false },
       ],
     },
   ]),
