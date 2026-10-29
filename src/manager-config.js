@@ -10,7 +10,7 @@
 // deliberately blocked so that a typo cannot silently replace the live setup.
 
 export const MANAGER_CONFIG = Object.freeze({
-  version: 12,
+  version: 13,
   pools: Object.freeze([
     {
       pool: "segment_1",
@@ -24,7 +24,7 @@ export const MANAGER_CONFIG = Object.freeze({
         { code: "s1_manager_6", name: "Менеджер 6", active: true },
         { code: "s1_manager_7", name: "Менеджер 7", active: false },
         { code: "s1_manager_8", name: "Менеджер 8", active: false },
-        { code: "s1_manager_9", name: "Менеджер 9", active: true },
+        { code: "s1_manager_9", name: "Менеджер 9", active: false },
       ],
     },
     {
@@ -39,7 +39,7 @@ export const MANAGER_CONFIG = Object.freeze({
         { code: "s2_manager_6", name: "Менеджер 6", active: true },
         { code: "s2_manager_7", name: "Менеджер 7", active: false },
         { code: "s2_manager_8", name: "Менеджер 8", active: false },
-        { code: "s2_manager_9", name: "Менеджер 9", active: true },
+        { code: "s2_manager_9", name: "Менеджер 9", active: false },
       ],
     },
     {
@@ -54,7 +54,7 @@ export const MANAGER_CONFIG = Object.freeze({
         { code: "s3_manager_6", name: "Менеджер 6", active: true },
         { code: "s3_manager_7", name: "Менеджер 7", active: false },
         { code: "s3_manager_8", name: "Менеджер 8", active: false },
-        { code: "s3_manager_9", name: "Менеджер 9", active: true },
+        { code: "s3_manager_9", name: "Менеджер 9", active: false },
       ],
     },
     {
@@ -69,7 +69,7 @@ export const MANAGER_CONFIG = Object.freeze({
         { code: "s4_manager_6", name: "Менеджер 6", active: true },
         { code: "s4_manager_7", name: "Менеджер 7", active: false },
         { code: "s4_manager_8", name: "Менеджер 8", active: false },
-        { code: "s4_manager_9", name: "Менеджер 9", active: true },
+        { code: "s4_manager_9", name: "Менеджер 9", active: false },
       ],
     },
     {
